@@ -17,11 +17,14 @@ const userSignupSchema=mongoose.Schema({
         required: [true,"plz enter the password"],
         minimum: [6, 'plz enter minimum six length password'],
         
-    },
+    }
+   
+
     
        
     
 },{
     timestamps: true,
 })
+
 module.exports=mongoose.model("user",userSignupSchema)
