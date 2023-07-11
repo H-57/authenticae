@@ -18,7 +18,7 @@ const userSignupSchema=mongoose.Schema({
         minimum: [6, 'plz enter minimum six length password'],
         
     }
-   
+ 
 
     
        

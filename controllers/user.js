@@ -1,22 +1,26 @@
-const { redirect } = require('express/lib/response')
-const user=require('../models/userSingup')
 
+const user=require('../models/userSingup')
+const guest=require('../models/guestUser')
 const{ setUser }=require('../service/auth')
+
+
 // handel signup and create user
+
+
 const handelUserSignup=async (req,res)=>{
     const{name,email,password}= req.body
-    if(!email||!password){
+    if(!email||!password||!name){
 
-        return  res.status(404).json({error:"plz fill  fields"})
+        return  res.status(404).json({message:"plz fill  fields",status:"error"})
   
       }
     const userExist=await user.find({email,})
-    if(userExist.length > 0) return res.json({error:"this email is used already",name,email,password})
+    if(userExist.length > 0) return res.json({message:"this email is used already",status:"error"})
     try {
         const userData= await user.create({name,email,password})
         console.log(userData)
-        // res.json({"data":"sucess data added"})
-       res.redirect("/user/login")
+        res.json({message:"Account created sucessfully",status:"ok"})
+      
     } catch (error) {
         res.send(error.message)
     }
@@ -31,7 +35,7 @@ const handelUserLogin=async (req,res)=>{
 
     if(!email||!password){
 
-      return  res.status(404).json({error:"plz fill  fields"})
+      return  res.json({message:"plz fill  fields",status:"error"})
 
     }
     
@@ -41,23 +45,42 @@ const handelUserLogin=async (req,res)=>{
       
 
         if(!User){
-            return res.status(404).json({error:"plz enter right email info"})
+            return res.status(404).json({message:"plz enter right email info",status:"error"})
             }
 
           
         if(User.password!=password){
-          return  res.status(404).json({error:"plz enter right password info"})
+          return  res.status(404).json({message:"plz enter right password info",status:"error"})
             }
        
            
            const tocken= setUser(User)
-            res.cookie("uid",tocken)
-            res.redirect("/")
+            await res.cookie("uid",tocken)
+           
+            res.json({message:"login sucess",status:"ok "})
+            
+           
+           
     } 
     catch (error) {
         res.send(error.message)
     }
       
+
+}
+const logOut=async(req,res)=>{
+res.clearCookie("uid");
+res.redirect('/user/login')
+
+}
+// handel guest user 
+const guestlogin=async (req,res)=>{
+
+
+    const GuestUser=guest.create({name:"Guest"})
+    const tocken= setUser(GuestUser)
+    await res.cookie("uid",tocken)
+    res.redirect("/")
 
 }
 
@@ -70,4 +93,5 @@ const getUserData=async(req,res)=>{
     }
     
 }
-module.exports={handelUserSignup,getUserData,handelUserLogin}
+
+module.exports={handelUserSignup,getUserData,handelUserLogin,logOut,guestlogin}
